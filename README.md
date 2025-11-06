@@ -4,13 +4,13 @@ Ini adalah repositori submisi untuk tes asesmen Software Engineer di PT Informat
 
 Aplikasi ini adalah web app sederhana dengan fitur **Autentikasi** (Sign Up, Sign In, Sign Out) dan **Manajemen Post (CRUD)**, lengkap dengan paginasi.
 
-[cite_start]Sesuai persyaratan [cite: 5, 6, 11][cite_start], fungsionalitas yang sama diimplementasikan menggunakan dua tumpukan teknologi (stack) modern yang berbeda untuk mendemonstrasikan keserbagunaan[cite: 25].
+Sesuai persyaratan, fungsionalitas yang sama diimplementasikan menggunakan dua tumpukan teknologi (stack) modern yang berbeda untuk mendemonstrasikan keserbagunaan.
 
 ---
 
 ## Struktur Repositori
 
-[cite_start]Semua implementasi berada di dalam satu repositori Git ini, yang diorganisir ke dalam direktori terpisah[cite: 40]:
+Semua implementasi berada di dalam satu repositori Git ini, yang diorganisir ke dalam direktori terpisah:
 
 - `/laravel`: Implementasi full-stack menggunakan **Laravel (Blade)**.
 - `/nextjs`: Implementasi full-stack menggunakan **Next.js (App Router)**.
@@ -80,7 +80,7 @@ Implementasi ini menggunakan pendekatan _server-rendered_ murni dengan Laravel, 
 
 ## 2. Implementasi Next.js (Full-Stack)
 
-[cite_start]Implementasi ini menggunakan Next.js dengan App Router[cite: 22]. Semua logika _backend_ (API Routes), _frontend_ (React Server & Client Components), dan _autentikasi_ ditangani dalam satu _codebase_.
+Implementasi ini menggunakan Next.js dengan App Router. Semua logika _backend_ (API Routes), _frontend_ (React Server & Client Components), dan _autentikasi_ ditangani dalam satu _codebase_.
 
 ### 📜 Teknologi yang Digunakan
 
@@ -129,9 +129,9 @@ Implementasi ini menggunakan pendekatan _server-rendered_ murni dengan Laravel, 
 
 ---
 
-## [cite_start]Catatan Khusus & Pilihan Teknologi [cite: 38]
+## Catatan Khusus & Pilihan Teknologi
 
-- [cite_start]**Pilihan Stack:** Dokumen asesmen menyebutkan "all three stacks" [cite: 23] [cite_start]namun hanya mendaftar dua teknologi wajib: **Laravel** [cite: 21] [cite_start]dan **Next.js**[cite: 22]. Submisi ini berfokus pada dua _stack_ yang terdaftar secara eksplisit.
+- **Pilihan Stack:** Dokumen asesmen menyebutkan "all three stacks" namun hanya mendaftar dua teknologi wajib: **Laravel** dan **Next.js**. Submisi ini berfokus pada dua _stack_ yang terdaftar secara eksplisit.
 - **Implementasi Laravel:**
   - Autentikasi menggunakan **Laravel Breeze** untuk _scaffolding_ yang cepat dan bersih.
   - Rute non-esensial (seperti `/dashboard` dan `/profile`) telah dihapus untuk fokus pada fitur inti.
@@ -142,6 +142,6 @@ Implementasi ini menggunakan pendekatan _server-rendered_ murni dengan Laravel, 
   - Semua API _endpoint_ (`/api/posts` dan `/api/posts/[id]`) dilindungi dan memvalidasi kepemilikan data berdasarkan sesi pengguna.
   - Halaman _root_ (`/`) secara otomatis mengarahkan pengguna ke `/login` (jika _logout_) atau `/posts` (jika _login_) menggunakan _server-side redirect_.
 
-## (Bonus) [cite_start]Docker Compose [cite: 41]
+## (Bonus) Docker Compose
 
 _(TODO: Instruksi untuk menjalankan kedua stack secara bersamaan menggunakan Docker Compose dapat ditambahkan di sini.)_
