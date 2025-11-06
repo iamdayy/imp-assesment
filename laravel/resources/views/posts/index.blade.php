@@ -15,15 +15,15 @@
                         <table class="table w-full">
                             <thead>
                                 <tr>
-                                    <th>Title</th>
-                                    <th>Actions</th>
+                                    <th class="text-left text-gray-800">Title</th>
+                                    < class="text-left text-gray-800">Actions</>
                                 </tr>
                             </thead>
                             <tbody>
                                 @foreach ($posts as $post)
                                     <tr>
-                                        <td>{{ $post->title }}</td>
-                                        <td>
+                                        <td class="text-left text-gray-800">{{ $post->title }}</td>
+                                        <td class="text-left text-gray-800">
                                             <a href="{{ route('posts.show', $post) }}" class="btn btn-sm">View</a>
                                             <a href="{{ route('posts.edit', $post) }}" class="btn btn-sm">Edit</a>
                                         </td>
