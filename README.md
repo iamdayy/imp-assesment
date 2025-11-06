@@ -8,140 +8,164 @@ Sesuai persyaratan, fungsionalitas yang sama diimplementasikan menggunakan dua t
 
 ---
 
-## Struktur Repositori
+## 🚀 Instalasi & Menjalankan (Metode Direkomendasikan: Docker)
 
-Semua implementasi berada di dalam satu repositori Git ini, yang diorganisir ke dalam direktori terpisah:
+Cara termudah dan tercepat untuk menjalankan **keseluruhan proyek** (kedua aplikasi dan database) adalah dengan menggunakan Docker.
 
-- `/laravel`: Implementasi full-stack menggunakan **Laravel (Blade)**.
-- `/nextjs`: Implementasi full-stack menggunakan **Next.js (App Router)**.
+**Prasyarat:** Anda harus menginstal **Docker Desktop**.
 
----
+### 1. Persiapan Environment
 
-## 1. Implementasi Laravel (Full-Stack)
+Anda perlu membuat dua file `.env` (satu untuk Laravel, satu untuk Next.js) sebelum menjalankan Docker.
 
-Implementasi ini menggunakan pendekatan _server-rendered_ murni dengan Laravel, Blade, dan tumpukan TALL (Tailwind, Alpine.js) yang disediakan oleh Breeze.
+**A. Laravel:**
+Salin file `.env` contoh di dalam folder `laravel`:
 
-### 📜 Teknologi yang Digunakan
+```bash
+cp laravel/.env.example laravel/.env
+Buat application key (ini wajib untuk Docker):
+```
 
-- **Framework:** Laravel
-- **Frontend:** Blade, Tailwind CSS
-- **UI Components:** DaisyUI
-- **Autentikasi:** Laravel Breeze (Blade Stack)
-- **Database:** MySQL
+```bash
+# Jalankan di terminal Anda (di dalam folder /laravel)
+cd laravel
+php artisan key:generate
+cd ..
+```
 
-### 🚀 Instalasi dan Cara Menjalankan (Laravel)
+Catatan: Anda tidak perlu mengubah isi file .env ini, karena file docker-compose.yml akan menimpanya.
 
-1.  Masuk ke direktori:
-    ```bash
-    cd laravel
-    ```
-2.  Salin file _environment_:
-    ```bash
-    cp .env.example .env
-    ```
-3.  Install dependensi Composer:
-    ```bash
-    composer install
-    ```
-4.  Buat _application key_:
-    ```bash
-    php artisan key:generate
-    ```
-5.  **Konfigurasi Database:** Buka file `.env` dan atur kredensial **MySQL** Anda. Pastikan Anda sudah membuat database (misal: `imp_assessment_laravel`).
-    ```.env
-    DB_CONNECTION=mysql
-    DB_HOST=127.0.0.1
-    DB_PORT=3306
-    DB_DATABASE=imp_assessment_laravel
-    DB_USERNAME=root
-    DB_PASSWORD=
-    ```
-6.  Jalankan migrasi database (ini akan membuat tabel `users`, `password_resets`, dan `posts`):
-    ```bash
-    php artisan migrate
-    ```
-7.  Install dependensi NPM:
-    ```bash
-    npm install
-    ```
-8.  Jalankan _development server_:
+B. Next.js: Buat file .env kosong di dalam folder nextjs:
 
-    ```bash
-    # Terminal 1: Jalankan Vite (Frontend)
-    npm run dev
+```bash
+touch nextjs/.env
+```
 
-    # Terminal 2: Jalankan Laravel (Backend)
-    php artisan serve
-    ```
+Catatan: File ini diperlukan agar build Docker tidak gagal. Variabel environment akan disuntik oleh docker-compose.yml.
 
-9.  Aplikasi sekarang berjalan di `http://127.0.0.1:8000`.
+2. Jalankan Docker Compose
+   Dari direktori root proyek (tempat file docker-compose.yml berada), jalankan:
+
+```bash
+docker-compose up --build
+Ini akan memakan waktu beberapa menit saat pertama kali, karena akan mengunduh image (MySQL, Nginx, PHP) dan membangun kedua aplikasi Anda.
+```
+
+3. Jalankan Migrasi (Satu Kali)
+   Setelah semua container berjalan, buka terminal baru dan jalankan perintah migrasi berikut untuk menyiapkan tabel database:
+
+A. Migrasi Laravel:
+
+```bash
+
+docker-compose exec laravel-app php artisan migrate --force
+```
+
+Catatan: Anda mungkin juga perlu menjalankan docker-compose exec laravel-app php artisan config:cache, route:cache, dan view:cache jika Anda mengubah file-file tersebut di mode produksi.
+
+B. Migrasi Next.js (Prisma):
+
+```bash
+docker-compose exec nextjs-app npx prisma migrate dev
+```
+
+Selesai! Aplikasi Anda Siap:
+Aplikasi Laravel berjalan di: http://localhost:8000
+
+Aplikasi Next.js berjalan di: http://localhost:3000
 
 ---
 
-## 2. Implementasi Next.js (Full-Stack)
+Kedua aplikasi terhubung ke database MySQL yang berbeda (imp_assessment_laravel dan imp_assessment_nextjs) melalui Docker.
 
-Implementasi ini menggunakan Next.js dengan App Router. Semua logika _backend_ (API Routes), _frontend_ (React Server & Client Components), dan _autentikasi_ ditangani dalam satu _codebase_.
+Struktur Repositori
+/laravel: Implementasi full-stack menggunakan Laravel (Blade).
 
-### 📜 Teknologi yang Digunakan
+/nextjs: Implementasi full-stack menggunakan Next.js (App Router).
 
-- **Framework:** Next.js (App Router)
-- **Backend:** Next.js API Routes
-- **Database & ORM:** MySQL dengan Prisma
-- **Autentikasi:** NextAuth.js (Credentials Provider)
-- **UI Components:** Tailwind CSS, DaisyUI
-- **Struktur:** Semua kode aplikasi berada di dalam direktori `src/`.
+docker-compose.yml: File orkestrasi untuk menjalankan kedua stack (Bonus).
 
-### 🚀 Instalasi dan Cara Menjalankan (Next.js)
+1. Implementasi Laravel (Full-Stack)
+   Implementasi ini menggunakan pendekatan server-rendered murni dengan Laravel, Blade, dan tumpukan TALL (Tailwind, Alpine.js) yang disediakan oleh Breeze.
 
-1.  Masuk ke direktori:
-    ```bash
-    cd nextjs
-    ```
-2.  Install dependensi NPM:
-    ```bash
-    npm install
-    ```
-3.  **Konfigurasi Environment:** Buat file `.env` di _root_ folder `nextjs/`.
-    ```bash
-    touch .env
-    ```
-4.  Isi file `.env` dengan koneksi database **MySQL** dan _secret_ untuk NextAuth.
+📜 Teknologi yang Digunakan
+Framework: Laravel
 
-    ```.env
-    # Format: mysql://USER:PASSWORD@HOST:PORT/DATABASE
-    # Pastikan database (misal: imp_assessment_next) sudah dibuat.
-    DATABASE_URL="mysql://root:password@localhost:3306/imp_assessment_next"
+Frontend: Blade, Tailwind CSS
 
-    # Secret untuk NextAuth.js (bisa digenerate dengan: openssl rand -base64 32)
-    NEXTAUTH_SECRET=your-super-secret-key
-    NEXTAUTH_URL=http://localhost:3000
-    ```
+UI Components: DaisyUI
 
-5.  **Migrasi Database:** Jalankan Prisma untuk menerapkan skema (`schema.prisma`) ke database MySQL Anda:
-    ```bash
-    npx prisma migrate dev
-    ```
-6.  Jalankan _development server_:
-    ```bash
-    npm run dev
-    ```
-7.  Aplikasi sekarang berjalan di `http://localhost:3000`.
+Autentikasi: Laravel Breeze (Blade Stack)
 
----
+Database: MySQL
 
-## Catatan Khusus & Pilihan Teknologi
+🚀 Instalasi Manual (Laravel)
+(Instalasi manual jika Anda tidak menggunakan Docker)
 
-- **Pilihan Stack:** Dokumen asesmen menyebutkan "all three stacks" namun hanya mendaftar dua teknologi wajib: **Laravel** dan **Next.js**. Submisi ini berfokus pada dua _stack_ yang terdaftar secara eksplisit.
-- **Implementasi Laravel:**
-  - Autentikasi menggunakan **Laravel Breeze** untuk _scaffolding_ yang cepat dan bersih.
-  - Rute non-esensial (seperti `/dashboard` dan `/profile`) telah dihapus untuk fokus pada fitur inti.
-  - Pengguna yang login otomatis diarahkan ke halaman `/posts`.
-- **Implementasi Next.js:**
-  - Menggunakan **Prisma** sebagai ORM untuk manajemen database yang modern dan _type-safe_.
-  - Autentikasi menggunakan **NextAuth.js** dengan _Credentials Provider_. Karena itu, API route kustom (`/api/register`) dibuat untuk menangani pendaftaran pengguna baru.
-  - Semua API _endpoint_ (`/api/posts` dan `/api/posts/[id]`) dilindungi dan memvalidasi kepemilikan data berdasarkan sesi pengguna.
-  - Halaman _root_ (`/`) secara otomatis mengarahkan pengguna ke `/login` (jika _logout_) atau `/posts` (jika _login_) menggunakan _server-side redirect_.
+cd laravel
 
-## (Bonus) Docker Compose
+cp .env.example .env
 
-_(TODO: Instruksi untuk menjalankan kedua stack secara bersamaan menggunakan Docker Compose dapat ditambahkan di sini.)_
+composer install
+
+php artisan key:generate
+
+Atur kredensial database MySQL Anda di .env.
+
+php artisan migrate
+
+npm install
+
+npm run dev (di satu terminal) & php artisan serve (di terminal lain).
+
+2. Implementasi Next.js (Full-Stack)
+   Implementasi ini menggunakan Next.js dengan App Router. Semua logika backend (API Routes), frontend (React Server & Client Components), dan autentikasi ditangani dalam satu codebase.
+
+📜 Teknologi yang Digunakan
+Framework: Next.js (App Router, Node.js 22)
+
+Backend: Next.js API Routes
+
+Database & ORM: MySQL dengan Prisma
+
+Autentikasi: NextAuth.js (Credentials Provider)
+
+UI Components: Tailwind CSS, DaisyUI
+
+Struktur: Semua kode aplikasi berada di dalam direktori src/.
+
+🚀 Instalasi Manual (Next.js)
+(Instalasi manual jika Anda tidak menggunakan Docker)
+
+cd nextjs
+
+npm install
+
+Buat file .env dan isi DATABASE_URL, NEXTAUTH_SECRET, dan NEXTAUTH_URL.
+
+npx prisma migrate dev
+
+npm run dev
+
+Aplikasi berjalan di http://localhost:3000.
+
+Catatan Khusus & Pilihan Teknologi
+Pilihan Stack: Dokumen asesmen menyebutkan "all three stacks" namun hanya mendaftar dua teknologi wajib: Laravel dan Next.js. Submisi ini berfokus pada dua stack yang terdaftar secara eksplisit.
+
+Implementasi Laravel:
+
+Autentikasi menggunakan Laravel Breeze untuk scaffolding yang cepat dan bersih.
+
+Rute non-esensial (seperti /dashboard dan /profile) telah dihapus untuk fokus pada fitur inti.
+
+Pengguna yang login otomatis diarahkan ke halaman /posts.
+
+Implementasi Next.js:
+
+Menggunakan Prisma sebagai ORM untuk manajemen database yang modern dan type-safe.
+
+Autentikasi menggunakan NextAuth.js dengan Credentials Provider. API route kustom (/api/register) dibuat untuk menangani pendaftaran pengguna baru.
+
+Konfigurasi authOptions dipisah ke src/lib/auth.ts untuk mematuhi aturan ketat Next.js Route Handler.
+
+Halaman root (/) secara otomatis mengarahkan pengguna ke /login (jika logout) atau /posts (jika login) menggunakan server-side redirect.

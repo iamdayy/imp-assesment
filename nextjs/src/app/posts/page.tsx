@@ -15,7 +15,7 @@ interface Post {
 
 export default function PostsPage() {
   const router = useRouter();
-  const { data: session, status } = useSession();
+  const { status } = useSession();
 
   // State untuk menyimpan data
   const [posts, setPosts] = useState<Post[]>([]);

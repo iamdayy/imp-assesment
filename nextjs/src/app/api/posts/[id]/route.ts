@@ -1,4 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route";
+import { authOptions } from "@/lib/auth";
 import { prisma } from "@/lib/prisma";
 import { getServerSession } from "next-auth";
 import { NextResponse } from "next/server";
@@ -24,15 +24,22 @@ async function checkPostOwnership(postId: string, userEmail: string) {
 // GET /api/posts/[id] (View Post Details)
 export async function GET(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
+  const { id } = await context.params;
+
+  // Validasi id
+  if (!id) {
+    return new NextResponse("Invalid ID", { status: 400 });
+  }
+
   const { post, error, status } = await checkPostOwnership(
-    params.id,
+    id,
     session.user.email
   );
 
@@ -46,18 +53,22 @@ export async function GET(
 // PUT /api/posts/[id] (Update Post)
 export async function PUT(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
+  const { id } = await context.params;
+
+  // Validasi id
+  if (!id) {
+    return new NextResponse("Invalid ID", { status: 400 });
+  }
+
   // Otorisasi: Cek kepemilikan post
-  const { error, status } = await checkPostOwnership(
-    params.id,
-    session.user.email
-  );
+  const { error, status } = await checkPostOwnership(id, session.user.email);
   if (error) {
     return new NextResponse(error, { status });
   }
@@ -68,7 +79,7 @@ export async function PUT(
     const { title, content } = body;
 
     const updatedPost = await prisma.post.update({
-      where: { id: params.id },
+      where: { id },
       data: { title, content },
     });
 
@@ -82,18 +93,22 @@ export async function PUT(
 // DELETE /api/posts/[id] (Delete Post)
 export async function DELETE(
   request: Request,
-  { params }: { params: { id: string } }
+  context: { params: Promise<{ id: string }> }
 ) {
   const session = await getServerSession(authOptions);
   if (!session || !session.user?.email) {
     return new NextResponse("Unauthorized", { status: 401 });
   }
 
+  const { id } = await context.params;
+
+  // Validasi ID
+  if (!id) {
+    return new NextResponse("Invalid ID", { status: 400 });
+  }
+
   // Otorisasi: Cek kepemilikan post
-  const { error, status } = await checkPostOwnership(
-    params.id,
-    session.user.email
-  );
+  const { error, status } = await checkPostOwnership(id, session.user.email);
   if (error) {
     return new NextResponse(error, { status });
   }
@@ -101,7 +116,7 @@ export async function DELETE(
   // Lanjut hapus jika diotorisasi
   try {
     await prisma.post.delete({
-      where: { id: params.id },
+      where: { id },
     });
     return new NextResponse(null, { status: 204 }); // 204 No Content
     // eslint-disable-next-line @typescript-eslint/no-unused-vars

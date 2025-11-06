@@ -1,4 +1,4 @@
-import { authOptions } from "@/app/api/auth/[...nextauth]/route"; // Sesuaikan path jika perlu
+import { authOptions } from "@/lib/auth"; // Sesuaikan path jika perlu
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 

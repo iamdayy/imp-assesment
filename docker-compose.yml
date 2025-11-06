@@ -1,0 +1,73 @@
+version: "3.8"
+
+services:
+  # --- 1. Service Database (MySQL) ---
+  # Ini akan menjadi database untuk KEDUA aplikasi
+  db:
+    image: mysql:8.0
+    container_name: imp-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_DATABASE: imp_assessment_db # Database umum
+      MYSQL_ROOT_PASSWORD: root # Password root, ganti jika perlu
+    ports:
+      - "3307:3306" # Map port MySQL ke host
+    volumes:
+      - db-data:/var/lib/mysql
+
+  # --- 2. Service Aplikasi Laravel ---
+  laravel-app:
+    build:
+      context: ./laravel # Path ke Dockerfile Laravel
+    container_name: imp-laravel-app
+    restart: unless-stopped
+    depends_on:
+      - db # Menunggu database siap
+    environment:
+      # Beri tahu Laravel cara konek ke service 'db'
+      DB_CONNECTION: mysql
+      DB_HOST: db # Nama service, bukan 'localhost'
+      DB_PORT: 3306
+      DB_DATABASE: imp_assessment_laravel
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      APP_ENV: production
+      APP_DEBUG: false
+      APP_URL: http://localhost:8000
+      APP_KEY: "base64:6xyFk2D1z8YKOSJB2XWga+9iwG/g+2n+qxRgvo3YbAs="
+    volumes:
+      - ./laravel:/var/www/html # Sinkronisasi kode (opsional, bagus untuk dev)
+
+  # Nginx untuk melayani Laravel
+  laravel-nginx:
+    image: nginx:alpine
+    container_name: imp-laravel-nginx
+    restart: unless-stopped
+    ports:
+      - "8000:80" # Aplikasi Laravel akan diakses di http://localhost:8000
+    volumes:
+      - ./laravel:/var/www/html # Akses ke file public Laravel
+      - ./laravel/docker/nginx.conf:/etc/nginx/conf.d/default.conf # Konfigurasi Nginx
+    depends_on:
+      - laravel-app
+
+  # --- 3. Service Aplikasi Next.js ---
+  nextjs-app:
+    build:
+      context: ./nextjs # Path ke Dockerfile Next.js
+    container_name: imp-nextjs-app
+    restart: unless-stopped
+    depends_on:
+      - db # Menunggu database siap
+    environment:
+      # Beri tahu Next.js/Prisma cara konek ke service 'db'
+      DATABASE_URL: mysql://root:root@db:3306/imp_assessment_nextjs
+      NEXTAUTH_SECRET: "your-secret-key-for-docker" # Ganti ini
+      NEXTAUTH_URL: http://localhost:3000
+      NODE_ENV: production
+    ports:
+      - "3000:3000" # Aplikasi Next.js akan diakses di http://localhost:3000
+
+# Volume untuk menyimpan data MySQL secara persisten
+volumes:
+  db-data:

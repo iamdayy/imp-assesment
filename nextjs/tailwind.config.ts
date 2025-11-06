@@ -7,6 +7,7 @@ const config: Config = {
   theme: {
     extend: {},
   },
+  darkMode: false,
   plugins: [], // Tambahkan ini
 };
 export default config;
